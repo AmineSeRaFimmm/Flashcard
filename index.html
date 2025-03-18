@@ -43,10 +43,10 @@
 			let correct = Array(9).fill(0);
 			let home, test, list;
 			let cardSets = new Set();
-			let courseType = 'hsk';
+			let courseType = 'hsk'; // 默认课程类型为 hsk
 			let tts;
 			let hskPopup, checkBox, elvl, hskButton;
-			let coursePopup, courseButton;
+			let workshopPopup, workshopButton, workshopCheckBox;
 			let cardDiv, studyBtn, refreshCards, studyIndex = 0;
 			let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true;
 			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = [];
@@ -82,63 +82,40 @@
 				tts = document.getElementById("tts");
 				checkBox = document.querySelectorAll(`input[name*="hsk-"]`);
 				for (let i = 0; i < checkBox.length; i++) {
-					checkBox[i].onchange = () => getCategory(checkBox,elvl);
+					checkBox[i].onchange = () => getCategory(checkBox, elvl, 'hsk');
 				}
 				hskPopup = document.getElementById("hskPopup");
 				elvl = document.getElementById('elvl');
 				elvl.onclick = () => {
-					if (courseType === 'hsk') {
-						openClose(true,hskPopup);
-						window.history.pushState({page:'home',popup:1}, 'home');
-					}
+					courseType = 'hsk';
+					openClose(true,hskPopup);
+					window.history.pushState({page:'home',popup:1}, 'home');
 				}
 				hskButton = document.getElementById('hskButton');
 				hskButton.onclick = () => {
 					openClose(false,hskPopup);
-					init();
+					getCategory(checkBox, elvl, 'hsk');
+					cardSets = getCards(dictCards, 9);
+					addCards(cardSets, cardDiv);
 					window.history.back();
 				};
-				coursePopup = document.getElementById("coursePopup");
-				courseButton = document.getElementById('courseButton');
-				const courseCheckBox = document.querySelectorAll(`input[name*="course-"]`);
-				for (let i = 0; i < courseCheckBox.length; i++) {
-					courseCheckBox[i].addEventListener('change', () => {
-						getCourseType(courseCheckBox);
-						// 确保只有一个checkbox被选中
-						for (let j = 0; j < courseCheckBox.length; j++) {
-							if (courseCheckBox[j] !== courseCheckBox[i]) {
-								courseCheckBox[j].checked = false;
-							}
-						}
-					});
+				workshopPopup = document.getElementById("workshopPopup");
+				workshopButton = document.getElementById('workshopButton');
+				workshopCheckBox = document.querySelectorAll(`input[name*="workshop-"]`);
+				for (let i = 0; i < workshopCheckBox.length; i++) {
+					workshopCheckBox[i].onchange = () => getCategory(workshopCheckBox, elvl, 'workshop');
 				}
-				const courseSelectButton = document.getElementById('courseSelect');
-				if (courseSelectButton) {
-					courseSelectButton.onclick = () => {
-						console.log("Course button clicked");
-						if (coursePopup) {
-							openClose(true, coursePopup);
-							window.history.pushState({page:'home',popup:3}, 'home');
-						} else {
-							console.error("coursePopup not found");
-						}
-					};
-				} else {
-					console.error("courseSelect button not found");
+				document.getElementById('workshopSelect').onclick = () => {
+					courseType = 'workshop';
+					workshopPopup.style.display = 'block'; // 确保 popup 可见
+					openClose(true, workshopPopup);
+					window.history.pushState({page:'home',popup:2}, 'home');
 				}
-				courseButton.onclick = () => {
-					console.log("Course confirm button clicked, courseType:", courseType);
-					openClose(false, coursePopup);
-					if (courseType === 'workshop') {
-						const workshopPopup = document.getElementById('workshopPopup');
-						if (workshopPopup) {
-							workshopPopup.style.display = 'block'; // 确保 workshopPopup 可见
-							openClose(true, workshopPopup);
-						} else {
-							console.error("workshopPopup not found");
-						}
-					}
-					init();
+				workshopButton.onclick = () => {
+					openClose(false, workshopPopup);
+					getCategory(workshopCheckBox, elvl, 'workshop');
+					cardSets = getCards(dictCards, 9);
+					addCards(cardSets, cardDiv);
 					window.history.back();
 				};
 				cardDiv = document.getElementById("cardDiv");
@@ -146,7 +123,7 @@
 				refreshCards = document.getElementById("refreshCards");
 				studyBtn.onclick = () => {
 					study();
-					window.history.pushState({page:'home',popup:2}, 'home');
+					window.history.pushState({page:'home',popup:3}, 'home');
 				};
 				refreshCards.onclick = () => {
 					cardSets = getCards(dictCards,9);
@@ -278,15 +255,9 @@
 				init();
 			});
 			function init() {
-				getCourseType(document.querySelectorAll(`input[name*="course-"]`));
-				getCategory(checkBox, elvl);
+				getCategory(checkBox, elvl, 'hsk'); // 默认加载 HSK 数据
 				cardSets = getCards(dictCards, 9);
 				addCards(cardSets, cardDiv);
-				// 确保 courseSelect 按钮可见
-				const courseSelectButton = document.getElementById('courseSelect');
-				if (courseSelectButton) {
-					courseSelectButton.style.display = 'inline-block'; // 强制显示
-				}
 			}
 			function updateLearnedWords(wordList) {
 				document.getElementById('wordsLearned').innerHTML = "Words learned so far: "+wordList.length;
@@ -296,7 +267,10 @@
 				for (const word of wordList) {
 					const card = document.createElement('div');
 					card.innerHTML = `<span>${chineseAlpha.value=='simplified'?word.simplified:word.traditional}</span> <span>${word.pinyin}</span> <span>${word.eng}</span>`;
-					lwhsk[+(word.hsk || word.level)-1].appendChild(card);
+					const level = word.hsk || word.level;
+					if (level >= 1 && level <= 6) { // 确保 level 在 1-6 范围内
+						lwhsk[level-1].appendChild(card);
+					}
 				}
 			}
 			function addToLearnedWords(set, correct) {
@@ -365,7 +339,7 @@
 					if (val[0][0].charCodeAt() <= 122 && val[1][0].charCodeAt() <= 122) return false;
 					if (typeof val[2] != "string") return false;
 					if (typeof val[3] != "string") return false;
-					if (typeof val[4] != "string" && val[4].length != 1) return false;
+					if (typeof val[4] != "string") return false; // 修改：允许 hsk 或 level 为字符串
 					if (typeof val[5] != "number") return false;
 					if (typeof val[6] != "number") return false;
 					if (typeof val[7] != "string") return false;
@@ -644,6 +618,7 @@
 					document.getElementById(`page${meny.name}`).style.display = 'flex';
 					document.getElementById("bodyWrapper").children[0].style.display = 'block';
 					openClose(false,hskPopup);
+					openClose(false,workshopPopup);
 					openClose(false,studyPopup);
 				} else if (meny.name == 2) {
 					if (!force) window.history.replaceState({page:'test'},'test');
@@ -663,32 +638,12 @@
 					dom.classList.toggle(animateName);
 				},time);
 			}
-			function getCourseType(arrDom) {
-				let hasSelection = false;
+			function getCategory(arrDom, output, type) {
 				dictCards = [];
+				output.innerHTML = type === 'hsk' ? 'HSK' : 'Chinese Workshop';
 				for (let i = 0; i < arrDom.length; i++) {
 					if (arrDom[i].checked) {
-						hasSelection = true;
-						courseType = arrDom[i].value;
-						loadCourseData(courseType);
-						break;
-					}
-				}
-				if (!hasSelection) {
-					arrDom[0].checked = true;
-					courseType = 'hsk';
-					loadCourseData('hsk');
-				}
-				console.log("Course type selected:", courseType);
-			}
-			function loadCourseData(type) {
-				dictCards = [];
-				const checkboxes = type === 'hsk' ? checkBox : document.querySelectorAll(`input[name*="${type}-"]`);
-				const output = type === 'hsk' ? elvl : document.getElementById('courseLevel');
-				output.innerHTML = type === 'hsk' ? 'HSK' : 'Chinese Workshop';
-				for (let i = 0; i < checkboxes.length; i++) {
-					if (checkboxes[i].checked) {
-						let value = checkboxes[i].value;
+						let value = arrDom[i].value;
 						output.innerHTML += `-${value}`;
 						let dict;
 						if (type === 'hsk') {
@@ -704,51 +659,30 @@
 								traditional: entry[1],
 								pinyin: entry[3],
 								eng: eng,
-								level: value,
-								course: type
+								[type === 'hsk' ? 'hsk' : 'level']: value
 							});
 						}
 					}
 				}
-				console.log("Loaded data for", type, ":", dictCards);
-			}
-			function getCategory(arrDom, output) {
-				if (courseType === 'hsk') {
-					output.innerHTML = 'HSK';
-					dictCards = [];
-					for (let i = 0; i < arrDom.length; i++) {
-						if (arrDom[i].checked) {
-							let value = arrDom[i].value;
-							output.innerHTML += `-${value}`;
-							let dict = eval(`hsk${value}`);
-							for (let j = 0; j < dict.length; j++) {
-								let entry = dict[j].split("\t");
-								let eng = entry.splice(4, entry.length).join(' ');
-								dictCards.push({
-									simplified: entry[0],
-									traditional: entry[1],
-									pinyin: entry[3],
-									eng: eng,
-									hsk: value
-								});
-							}
-						}
+				if (dictCards.length == 0) {
+					arrDom[0].checked = true;
+					output.innerHTML += `-${arrDom[0].value}`;
+					let dict;
+					if (type === 'hsk') {
+						dict = hsk1;
+					} else {
+						dict = lesson1;
 					}
-					if (dictCards.length == 0) {
-						arrDom[0].checked = true;
-						output.innerHTML += `-${arrDom[0].value}`;
-						let dict = hsk1;
-						for (let i = 0; i < dict.length; i++) {
-							let entry = dict[i].split("\t");
-							let eng = entry.splice(4, entry.length).join(' ');
-							dictCards.push({
-								simplified: entry[0],
-								traditional: entry[1],
-								pinyin: entry[3],
-								eng: eng,
-								hsk: arrDom[0].value
-							});
-						}
+					for (let i = 0; i < dict.length; i++) {
+						let entry = dict[i].split("\t");
+						let eng = entry.splice(4, entry.length).join(' ');
+						dictCards.push({
+							simplified: entry[0],
+							traditional: entry[1],
+							pinyin: entry[3],
+							eng: eng,
+							[type === 'hsk' ? 'hsk' : 'level']: arrDom[0].value
+						});
 					}
 				}
 			}
@@ -787,8 +721,8 @@
 		</div>
 		<div id="bodyWrapper">
 			<header>
-				<button id="courseSelect">Course</button>
 				<button id="elvl">HSK</button>
+				<button id="workshopSelect">Chinese Workshop</button>
 				<span id="courseLevel" style="margin-left: 10px;"></span>
 			</header>
 			<main>
@@ -847,15 +781,6 @@
 				<br>
 				<button id="hskButton" class='btn'>Confirm</button>
 			</div>
-			<div class="popup" id='coursePopup'>
-				<div>
-					<h4>Choose Course Type</h4>
-					<p><input type="checkbox" name="course-hsk" id="course-hsk" value="hsk" checked><label for="course-hsk">HSK</label></p>
-					<p><input type="checkbox" name="course-workshop" id="course-workshop" value="workshop"><label for="course-workshop">Chinese Workshop</label></p>
-				</div>
-				<br>
-				<button id="courseButton" class='btn'>Confirm</button>
-			</div>
 			<div class="popup" id='workshopPopup' style="display: none;">
 				<div>
 					<h4>Choose Workshop Lessons</h4>
@@ -863,7 +788,7 @@
 					<p><input type="checkbox" name="workshop-2" id="workshop2" value="2"><label for="workshop2">Lesson 2</label></p>
 				</div>
 				<br>
-				<button class='btn' onclick="loadCourseData('workshop')">Confirm</button>
+				<button id="workshopButton" class='btn'>Confirm</button>
 			</div>
 			<div class="popup" id='studyResults'>
 				<div>
