@@ -339,7 +339,7 @@
 					if (val[0][0].charCodeAt() <= 122 && val[1][0].charCodeAt() <= 122) return false;
 					if (typeof val[2] != "string") return false;
 					if (typeof val[3] != "string") return false;
-					if (typeof val[4] != "string") return false; // 修改：允许 hsk 或 level 为字符串
+					if (typeof val[4] != "string" && val[4].length != 1) return false;
 					if (typeof val[5] != "number") return false;
 					if (typeof val[6] != "number") return false;
 					if (typeof val[7] != "string") return false;
@@ -497,50 +497,51 @@
 					}
 				}
 			}
-			function getCard(set,front,back) {
+			function getCard(set, front, back) {
 				if (studyIndex == set.length) {
 					showInfoPopup("Finished studying! New words added!");
 					setTimeout(() => {
-						showResult(set,correct);
-					},500);
+						showResult(set, correct);
+					}, 500);
 					return;
 				}
 				const cardNum = set[studyIndex];
 				const card = dictCards[cardNum];
 				front.innerHTML = `
 					<p>${card.pinyin}</p>
-					<p>${chineseAlpha.value=='simplified'?card.simplified:card.traditional}</p>
+					<p>${chineseAlpha.value == 'simplified' ? card.simplified : card.traditional}</p>
 				`;
 				back.innerHTML = `
 					<p>${card.pinyin}</p>
 					<p>${card.eng}</p>
 				`;
 				checkPinyin();
-				let options = shuffle(set);
-				options.length = 3;
+				let options = shuffle([...set]); // 创建副本并打乱
+				options.length = 3; // 限制为 3 个选项
 				if (!options.includes(cardNum)) {
-					options.pop();
-					options.push(cardNum);
+					options.pop(); // 移除最后一个，确保正确答案有位置
+					options.push(cardNum); // 添加正确答案
 				}
+				options = shuffle(options); // 再次打乱
+				console.log("Options:", options.map(n => dictCards[n].eng)); // 调试日志
 				playTTS(card.simplified);
-				options = shuffle(options);
 				const optionBtnWrapper = document.getElementById("divAnswers");
 				canFlip = false;
-				toggleAnimate(bigCard,'animate-2');
-				toggleAnimate(optionBtnWrapper,'animate-3');
+				toggleAnimate(bigCard, 'animate-2');
+				toggleAnimate(optionBtnWrapper, 'animate-3');
 				setTimeout(() => canFlip = true, 700);
 				optionBtnWrapper.innerHTML = '';
-				for (n of options) {
+				for (let n of options) {
 					const answerBtn = document.createElement('button');
-					answerBtn.innerHTML = dictCards[n].eng;
-					setTimeout(() => answerBtn.value = 'canClick',900);
+					answerBtn.innerHTML = dictCards[n].eng; // 使用正确的英文解释
+					setTimeout(() => answerBtn.value = 'canClick', 900);
 					answerBtn.onclick = function() {
 						if (this.value == "canClick") {
 							let count = 0;
 							this.classList.toggle('active');
 							this.disabled = true;
 							if (this.innerHTML == backCard.children[1].innerHTML) {
-								for (dom of optionBtnWrapper.children) {
+								for (let dom of optionBtnWrapper.children) {
 									if (dom.disabled == true) count++;
 									dom.disabled = true;
 								}
@@ -552,8 +553,8 @@
 									if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
 									progress.value++;
 									studyIndex++;
-									getCard(set,front,back);
-								},700);
+									getCard(set, front, back);
+								}, 700);
 							} else {
 								this.style.backgroundColor = 'rgba(0,0,0,0.5)';
 							}
@@ -634,7 +635,7 @@
 			}
 			function toggleAnimate(dom,animateName,time=1400) {
 				dom.classList.toggle(animateName);
-				setTimeout(() =>{
+				setTimeout(() => {
 					dom.classList.toggle(animateName);
 				},time);
 			}
