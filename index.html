@@ -29,7 +29,7 @@
 			}
 		</script>
 		<script type="text/javascript">
-			setTimeout(writePage, 14);
+			setTimeout(showPage, 14);
 			function showPage() {
 				document.getElementById("loader").style.visibility = "hidden";
 				document.getElementById("loader").style.opacity = 0;
@@ -102,16 +102,41 @@
 				courseButton = document.getElementById('courseButton');
 				const courseCheckBox = document.querySelectorAll(`input[name*="course-"]`);
 				for (let i = 0; i < courseCheckBox.length; i++) {
-					courseCheckBox[i].onchange = () => getCourseType(courseCheckBox);
+					courseCheckBox[i].addEventListener('change', () => {
+						getCourseType(courseCheckBox);
+						// 确保只有一个checkbox被选中
+						for (let j = 0; j < courseCheckBox.length; j++) {
+							if (courseCheckBox[j] !== courseCheckBox[i]) {
+								courseCheckBox[j].checked = false;
+							}
+						}
+					});
 				}
-				document.getElementById('courseSelect').onclick = () => {
-					openClose(true, coursePopup);
-					window.history.pushState({page:'home',popup:3}, 'home');
+				const courseSelectButton = document.getElementById('courseSelect');
+				if (courseSelectButton) {
+					courseSelectButton.onclick = () => {
+						console.log("Course button clicked");
+						if (coursePopup) {
+							openClose(true, coursePopup);
+							window.history.pushState({page:'home',popup:3}, 'home');
+						} else {
+							console.error("coursePopup not found");
+						}
+					};
+				} else {
+					console.error("courseSelect button not found");
 				}
 				courseButton.onclick = () => {
+					console.log("Course confirm button clicked, courseType:", courseType);
 					openClose(false, coursePopup);
 					if (courseType === 'workshop') {
-						openClose(true, document.getElementById('workshopPopup'));
+						const workshopPopup = document.getElementById('workshopPopup');
+						if (workshopPopup) {
+							workshopPopup.style.display = 'block'; // 确保 workshopPopup 可见
+							openClose(true, workshopPopup);
+						} else {
+							console.error("workshopPopup not found");
+						}
 					}
 					init();
 					window.history.back();
@@ -257,6 +282,11 @@
 				getCategory(checkBox, elvl);
 				cardSets = getCards(dictCards, 9);
 				addCards(cardSets, cardDiv);
+				// 确保 courseSelect 按钮可见
+				const courseSelectButton = document.getElementById('courseSelect');
+				if (courseSelectButton) {
+					courseSelectButton.style.display = 'inline-block'; // 强制显示
+				}
 			}
 			function updateLearnedWords(wordList) {
 				document.getElementById('wordsLearned').innerHTML = "Words learned so far: "+wordList.length;
@@ -636,7 +666,6 @@
 			function getCourseType(arrDom) {
 				let hasSelection = false;
 				dictCards = [];
-				
 				for (let i = 0; i < arrDom.length; i++) {
 					if (arrDom[i].checked) {
 						hasSelection = true;
@@ -645,20 +674,18 @@
 						break;
 					}
 				}
-				
 				if (!hasSelection) {
 					arrDom[0].checked = true;
 					courseType = 'hsk';
 					loadCourseData('hsk');
 				}
+				console.log("Course type selected:", courseType);
 			}
 			function loadCourseData(type) {
 				dictCards = [];
 				const checkboxes = type === 'hsk' ? checkBox : document.querySelectorAll(`input[name*="${type}-"]`);
 				const output = type === 'hsk' ? elvl : document.getElementById('courseLevel');
-				
 				output.innerHTML = type === 'hsk' ? 'HSK' : 'Chinese Workshop';
-				
 				for (let i = 0; i < checkboxes.length; i++) {
 					if (checkboxes[i].checked) {
 						let value = checkboxes[i].value;
@@ -683,6 +710,7 @@
 						}
 					}
 				}
+				console.log("Loaded data for", type, ":", dictCards);
 			}
 			function getCategory(arrDom, output) {
 				if (courseType === 'hsk') {
