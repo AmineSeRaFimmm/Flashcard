@@ -58,7 +58,16 @@
 			let foundUpdate = false, settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn; // page 2 settings
 			let lwp, lwhsk, listWords; // page 3 list learned words
 			
-			// Onload DOM and Event setups
+			// TTS 函数
+			function setTTS(word) {
+				const a = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(word)}&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female`;
+				if (tts.src != a) tts.src = a;
+			}
+			function playTTS(word) {
+				setTTS(word);
+				tts.play();
+			}
+			
 			window.addEventListener('load', function() {
 				home = document.getElementById('home');
 				test = document.getElementById('test');
@@ -138,6 +147,13 @@
 				}
 				resultButton.onclick = () => openClose(false,studyResults);
 				pinyinToggle.onchange = () => checkPinyin();
+				// 为播放按钮添加事件（播放当前大卡片的中文）
+				let playButton = document.getElementById("playButton");
+				playButton.onclick = function() {
+					// 始终使用 front 中的中文（第二个 <p> 标签内容）
+					let chineseText = bigCard.children[0].children[1].innerText;
+					playTTS(chineseText);
+				};
 				//SRS
 				srsBtn = document.getElementById("SRS");
 				srsPopup = document.getElementById("srsPopup");
@@ -168,7 +184,6 @@
 				settingsCloseBtn = document.getElementById("settingsCloseBtn");
 				settingsLoadBtn = document.getElementById("settingsLoadBtn");
 				settingsResetBtn = document.getElementById("settingsResetBtn");
-				textarea = document.getElementById("textarea");
 				creditBtn = document.getElementById("creditBtn");
 				creditCloseBtn = document.getElementById("creditCloseBtn");
 				settingsBtn.onclick = () => {
@@ -293,16 +308,6 @@
 				for (const card of data) {
 					learnedWords.push(card);
 				}
-			}
-
-			// TTS
-			function setTTS(word) {
-				const a = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(word)}&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female`;
-				if (tts.src != a) tts.src = a;
-			}
-			function playTTS(word) {
-				setTTS(word);
-				tts.play();
 			}
 
 			// Settings
@@ -790,12 +795,6 @@
 			</div>
 
 			<!-- Study Flipcards -->
-			<div class="popup" id='studyResults'>
-				<div>
-				</div>
-				<button id="resultButton" class='btn'>Done</button>
-			</div>
-
 			<div class="popup" id='study'>
 				<header class="popupHeader">
 					<div>
@@ -822,6 +821,8 @@
 					</div>
 				</div>
 				<span style='margin: 20px;'>click to flip</span>
+				<!-- 新增播放按钮 -->
+				<button id="playButton" class="btn">播放</button>
 				<br><br>
 				<div style='justify-content: center; display: flex; width: 93%;'>
 					<div id="divAnswers" class="studyBtn">
