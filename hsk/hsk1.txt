@@ -7,7 +7,7 @@ let hsk1 = [
 "期待\t期待\tqi1dai4\tqīdài\tto expect, to anticipate",
 "荣幸\t榮幸\trong2xing4\tróngxìng\thonored, privileged",
 "朋友\t朋友\tpeng2you5\tpéngyou\tfriend",
-"日子\t日子\TRI4zi5\trìzi\tday (referring to a period of time or a date)",
+"日子\t日子\tri4zi5\trìzi\tday (referring to a period of time or a date)",
 "努力\t努力\tnu3li4\tnǔlì\tto strive, to make an effort",
 "经理\t經理\tjing1li3\tjīnglǐ\tmanager",
 "主管\t主管\tzhu3guan3\tzhǔguǎn\tsupervisor",
