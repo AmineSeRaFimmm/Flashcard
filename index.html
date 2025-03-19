@@ -295,14 +295,19 @@
 				}
 			}
 
-			// TTS
+			// TTS - Updated to use SpeechSynthesis
 			function setTTS(word) {
-				const a = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(word)}&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female`;
-				if (tts.src != a) tts.src = a;
+				// No longer needed with SpeechSynthesis
 			}
 			function playTTS(word) {
-				setTTS(word);
-				tts.play();
+				if ('speechSynthesis' in window) {
+					const utterance = new SpeechSynthesisUtterance(word);
+					utterance.lang = "zh-CN";  // 设置为中文
+					utterance.rate = 0.7;      // 语速
+					speechSynthesis.speak(utterance);
+				} else {
+					console.error("你的浏览器不支持语音合成！");
+				}
 			}
 
 			// Settings
@@ -893,7 +898,7 @@
 					<h4>Code and app design by me</h4>
 					<p>Dictionary data provided by [Your Source]</p>
 					<p>Spaced Repetition Learning algorithm (SM2+) provided by <a href="http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2" target="_blank">BlueRaja</a></p>
-					<p>Text-to-speech provided by <a href="https://texttospeech.io/" target="_blank">https://texttospeech.io/</a></p>
+					<p>Text-to-speech provided by Browser SpeechSynthesis</p>
 					<p>The project and the datas provided are presented without licences<br/>
 					Feel free to build upon the project as you wish.</p>
 					<button id="creditCloseBtn" class='btn'>Close credits</button>
@@ -908,7 +913,7 @@
 					<button id="resetCloseBtn" class='btn'>Return</button>
 				</div>
 			</div>
-			<audio id="tts" src="https://texttospeech.responsivevoice.org/v1/text:synthesize?text=%E7%8B%97&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female"></audio>
+			<audio id="tts"></audio>
 			<!-- Info Popup -->
 			<div class="popup" id='infoPopup'>
 				<div class="whitebox">
@@ -916,5 +921,5 @@
 				</div>
 			</div>
 		</div>
-	</body>
+	<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'922c31d23d314583',t:'MTc0MjM3OTE3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
