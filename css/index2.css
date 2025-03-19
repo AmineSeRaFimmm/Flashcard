@@ -180,7 +180,7 @@ div.cardsMain > div > a {
   transform-style: preserve-3d;
 }
 .bigCard.flipped {
-  transform: rotateY(-180deg);
+  transform: rotateY(180deg);
 }
 p.hidePinyin {
 	opacity: 0;
@@ -216,7 +216,7 @@ p.hidePinyin {
   font-size: 2rem;
 }
 .back {
-  transform: rotateY(-180deg);
+  transform: rotateY(180deg);
 }
 progress[value] {
   -webkit-appearance: none;
