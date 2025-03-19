@@ -52,7 +52,7 @@
         let tts;
         let lessonPopup, checkBox, elvl, lessonButton;
         let cardDiv, studyBtn, refreshCards, studyIndex = 0;
-        let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true, isFlipped = false; // 添加 isFlipped
+        let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true;
         let srsBtn, srsPopup, ebackSrs, srsBigCard, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = [];
         let infoPopup, infoCanShow = true;
         let foundUpdate = false, settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn;
@@ -122,19 +122,13 @@
             resultButton = document.getElementById("resultButton");
             pinyinToggle = document.getElementById("pinyinToggle");
 
-            // 优化翻转逻辑
-            eflip.onclick = () => {
+            // 使用原始 HSK flipcard 的翻转逻辑
+            eflip.onclick = () => { 
                 if (canFlip) {
-                    canFlip = false; // 锁定翻转
-                    isFlipped = !isFlipped;
                     bigCard.classList.toggle('flipped');
-                    const frontText = frontCard.children[1].innerText;
-                    setTimeout(() => {
-                        playTTS(frontText); // 在动画完成后播放 TTS
-                        canFlip = true; // 动画结束后解锁
-                    }, 700); // 与 toggleAnimate 的时间一致
+                    playTTS(bigCard.children[0].children[1].innerText);
                 }
-            };
+            }
 
             eback.onclick = () => {
                 openClose(false, studyPopup);
@@ -523,8 +517,6 @@
                 <p>${card.eng}</p>
             `;
             checkPinyin();
-            bigCard.classList.remove('flipped'); // 确保新卡片显示正面
-            isFlipped = false; // 重置翻转状态
             let options = shuffle(set);
             options.length = 3;
             if (!options.includes(cardNum)) {
@@ -559,7 +551,6 @@
                             this.style.backgroundColor = 'white';
                             setTimeout(() => {
                                 if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
-                                isFlipped = false;
                                 progress.value++;
                                 studyIndex++;
                                 getCard(set, front, back);
@@ -912,5 +903,6 @@
         </div>
     </div>
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9229266d3ce7676f',t:'MTc0MjM0NzI1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'922953439cc51373',t:'MTc0MjM0OTA5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
