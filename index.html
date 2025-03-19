@@ -1,27 +1,31 @@
 <!doctype html>
 <html>
 	<head>
-		<title>中文工坊</title>
+		<title>Chinese Workshop Flipcard</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-		<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-		<link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
-		<link rel="shortcut icon" href="images/favicon.ico">
-		<meta name="msapplication-TileColor" content="#da532c">
-		<meta name="msapplication-config" content="images/browserconfig.xml">
-		<meta name="theme-color" content="#ffffff">
+	<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+	<link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="shortcut icon" href="images/favicon.ico">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="msapplication-config" content="images/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
 		<link href="css/index2.css" rel="stylesheet" type="text/css">
 		<link href="css/preloader.css" rel="stylesheet" type="text/css">
-		<script type="text/javascript" src='hsk/hsk1.js'></script>
-		<script type="text/javascript" src='hsk/hsk2.js'></script>
-		<script type="text/javascript" src='hsk/hsk3.js'></script>
-		<script type="text/javascript" src='hsk/hsk4.js'></script>
-		<script type="text/javascript" src='hsk/hsk5.js'></script>
-		<script type="text/javascript" src='hsk/hsk6.js'></script>
-		<script type="text/javascript" src='Chinese workshop/lesson1.js'></script>
-		<script type="text/javascript" src='Chinese workshop/lesson2.js'></script>
+		<script type="text/javascript" src='lessons/lesson1.js'></script>
+		<script type="text/javascript" src='lessons/lesson2.js'></script>
+		<script type="text/javascript" src='lessons/lesson3.js'></script>
+		<script type="text/javascript" src='lessons/lesson4.js'></script>
+		<script type="text/javascript" src='lessons/lesson5.js'></script>
+		<script type="text/javascript" src='lessons/lesson6.js'></script>
+		<script type="text/javascript" src='lessons/lesson7.js'></script>
+		<script type="text/javascript" src='lessons/lesson8.js'></script>
+		<script type="text/javascript" src='lessons/lesson9.js'></script>
+		<script type="text/javascript" src='lessons/lesson10.js'></script>
+		<script type="text/javascript" src='lessons/lesson11.js'></script>
+		<script type="text/javascript" src='lessons/lesson12.js'></script>
 		<link rel="manifest" href="manifest.json">
 		<script type="text/javascript">
 			if ('serviceWorker' in navigator) {
@@ -29,6 +33,8 @@
 			}
 		</script>
 		<script type="text/javascript">
+			//https://github.com/ReubenBond/HanBaoBao/blob/master/DictionaryDbBuilder/Hsk/HskHskCom/2.txt
+			//http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2
 			setTimeout(showPage, 14);
 			function showPage() {
 				document.getElementById("loader").style.visibility = "hidden";
@@ -43,17 +49,16 @@
 			let correct = Array(9).fill(0);
 			let home, test, list;
 			let cardSets = new Set();
-			let courseType = 'hsk'; // 默认课程类型为 hsk
-			let tts;
-			let hskPopup, checkBox, elvl, hskButton;
-			let workshopPopup, workshopButton, workshopCheckBox;
-			let cardDiv, studyBtn, refreshCards, studyIndex = 0;
-			let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true;
-			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = [];
-			let infoPopup, infoCanShow = true;
-			let foundUpdate = false, settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn;
-			let lwp, lwhsk, listWords;
-
+			
+			let tts; // tts
+			let lessonPopup, checkBox, elvl, lessonButton; // page 1 header
+			let cardDiv, studyBtn, refreshCards, studyIndex = 0; // page 1 main
+			let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true; //study screen
+			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = []; // srs screen
+			let infoPopup, infoCanShow = true; // page 2 srs
+			let foundUpdate = false, settingsBtn, creditBtn, checkUpdateBtn, settingsCloseBtn, settingsLoadBtn, settingsResetBtn, creditCloseBtn, settingsPopup, creditPopup, chineseAlpha, textarea, resetPopup, resetCloseBtn, resetConfirmBtn; // page 2 settings
+			let lwp, lwhsk, listWords; // page 3 list learned words
+			// Onload DOM and Event setups. Also calls some functions to initialize the app.
 			window.addEventListener('load', function() {
 				home = document.getElementById('home');
 				test = document.getElementById('test');
@@ -79,56 +84,38 @@
 				for (let v of [home,test,list]) {
 					v.onclick = function() {menyChange(this);};
 				}
+				// tts
 				tts = document.getElementById("tts");
-				checkBox = document.querySelectorAll(`input[name*="hsk-"]`);
+				// header
+				checkBox = document.querySelectorAll(`input[name*="lesson-"]`);
 				for (let i = 0; i < checkBox.length; i++) {
-					checkBox[i].onchange = () => getCategory(checkBox, elvl, 'hsk');
+					checkBox[i].onchange = () => getCategory(checkBox,elvl);
 				}
-				hskPopup = document.getElementById("hskPopup");
+				lessonPopup = document.getElementById("lessonPopup");
 				elvl = document.getElementById('elvl');
 				elvl.onclick = () => {
-					courseType = 'hsk';
-					openClose(true,hskPopup);
+					openClose(true,lessonPopup);
 					window.history.pushState({page:'home',popup:1}, 'home');
 				}
-				hskButton = document.getElementById('hskButton');
-				hskButton.onclick = () => {
-					openClose(false,hskPopup);
-					getCategory(checkBox, elvl, 'hsk');
-					cardSets = getCards(dictCards, 9);
-					addCards(cardSets, cardDiv);
+				lessonButton = document.getElementById('lessonButton');
+				lessonButton.onclick = () => {
+					openClose(false,lessonPopup);
+					init();
 					window.history.back();
 				};
-				workshopPopup = document.getElementById("workshopPopup");
-				workshopButton = document.getElementById('workshopButton');
-				workshopCheckBox = document.querySelectorAll(`input[name*="workshop-"]`);
-				for (let i = 0; i < workshopCheckBox.length; i++) {
-					workshopCheckBox[i].onchange = () => getCategory(workshopCheckBox, elvl, 'workshop');
-				}
-				document.getElementById('workshopSelect').onclick = () => {
-					courseType = 'workshop';
-					workshopPopup.style.display = 'block'; // 确保 popup 可见
-					openClose(true, workshopPopup);
-					window.history.pushState({page:'home',popup:2}, 'home');
-				}
-				workshopButton.onclick = () => {
-					openClose(false, workshopPopup);
-					getCategory(workshopCheckBox, elvl, 'workshop');
-					cardSets = getCards(dictCards, 9);
-					addCards(cardSets, cardDiv);
-					window.history.back();
-				};
+				// main
 				cardDiv = document.getElementById("cardDiv");
 				studyBtn = document.getElementById("mainStudyBtn");
 				refreshCards = document.getElementById("refreshCards");
 				studyBtn.onclick = () => {
 					study();
-					window.history.pushState({page:'home',popup:3}, 'home');
+					window.history.pushState({page:'home',popup:2}, 'home');
 				};
 				refreshCards.onclick = () => {
 					cardSets = getCards(dictCards,9);
 					addCards(cardSets, cardDiv);
 				};
+				// study screen
 				studyPopup = document.getElementById("study");
 				eflip = document.getElementById("eflip");
 				eback = document.getElementById("eback");
@@ -151,6 +138,7 @@
 				}
 				resultButton.onclick = () => openClose(false,studyResults);
 				pinyinToggle.onchange = () => checkPinyin();
+				//SRS
 				srsBtn = document.getElementById("SRS");
 				srsPopup = document.getElementById("srsPopup");
 				srsBtn.onclick = function() {
@@ -173,6 +161,7 @@
 				}
 				srsPinyinToggle.onchange = () => checkPinyin(1);
 				infoPopup = document.getElementById("infoPopup");
+				// page 2 settings
 				settingsPopup = document.getElementById("settingsPopup");
 				creditPopup = document.getElementById("creditPopup");
 				settingsBtn = document.getElementById("settingsBtn");
@@ -184,7 +173,7 @@
 				creditCloseBtn = document.getElementById("creditCloseBtn");
 				settingsBtn.onclick = () => {
 					openClose(true, settingsPopup);
-					textarea.value = utoa(localStorage.hskFlipCard);
+					textarea.value = utoa(localStorage.chineseWorkshopFlipCard);
 					window.history.pushState({page:'test',popup:2}, 'test');
 				}
 				settingsLoadBtn.onclick = () => loadProgress();
@@ -208,6 +197,7 @@
 				settingsResetBtn.onclick = () => openClose(true, resetPopup);
 				resetConfirmBtn.onclick = () => resetProgress();
 				resetCloseBtn.onclick = () => openClose(false, resetPopup);
+				// page 2 setting update btn
 				checkUpdateBtn = document.getElementById("checkUpdateBtn");
 				checkUpdateBtn.addEventListener('click', function() {
 					if ('serviceWorker' in navigator) {
@@ -242,22 +232,27 @@
 						});
 					}
 				});
+				// LocalStorage
 				listWords = document.getElementById("listWords");
+				// page 3 listWords
 				lwhsk = document.getElementsByClassName('lwhsk');
 				lwp = document.getElementsByClassName('lwp');
 				for (p of lwp) {
 					p.onclick = function() {
-						lwhsk[+this.innerText.substring(3)-1].classList.toggle("lwshow");
+						lwhsk[+this.innerText.substring(6)-1].classList.toggle("lwshow");
 						this.classList.toggle("lwshow");
 					}
 				}
 				checkLocalStorage();
+				// initialization
 				init();
 			});
 			function init() {
-				getCategory(checkBox, elvl, 'hsk'); // 默认加载 HSK 数据
-				cardSets = getCards(dictCards, 9);
+				getCategory(checkBox,elvl);
+				cardSets = getCards(dictCards,9);
 				addCards(cardSets, cardDiv);
+				//studyBtn.click();
+				//srsBtn.click();
 			}
 			function updateLearnedWords(wordList) {
 				document.getElementById('wordsLearned').innerHTML = "Words learned so far: "+wordList.length;
@@ -267,10 +262,7 @@
 				for (const word of wordList) {
 					const card = document.createElement('div');
 					card.innerHTML = `<span>${chineseAlpha.value=='simplified'?word.simplified:word.traditional}</span> <span>${word.pinyin}</span> <span>${word.eng}</span>`;
-					const level = word.hsk || word.level;
-					if (level >= 1 && level <= 6) { // 确保 level 在 1-6 范围内
-						lwhsk[level-1].appendChild(card);
-					}
+					lwhsk[+word.lesson-1].appendChild(card);
 				}
 			}
 			function addToLearnedWords(set, correct) {
@@ -278,8 +270,10 @@
 					const cardNum = set[i];
 					const card = dictCards[cardNum];
 					if (!learnedWords.includes(card)) {
-						card.difficulty = (card.hsk || card.level)*0.1 + 0.3;
-						card.difficulty += correct[i] == 1 ? -0.1 : 0.1;
+						card.difficulty = card.lesson*0.1 + 0.3;
+						card.difficulty += correct[i] == 1 ? -0.1 : 0.1; // difficulty increase if not correct on study
+						// set time to yesterday so srs can run
+						// 1 day = 86399462
 						card.daysBetweenReview = 3;
 						card.date = new Date(new Date().getTime()-(0*86399462)).toJSON();
 						learnedWords.push(card);
@@ -288,17 +282,20 @@
 				setLocalStorage(JSON.stringify(learnedWords));
 			}
 			function setLocalStorage(str) {
-				localStorage.setItem('hskFlipCard',str)
+				localStorage.setItem('chineseWorkshopFlipCard',str)
 			}
 			function checkLocalStorage() {
-				if (localStorage.getItem('hskFlipCard') == null) {
-					localStorage.setItem('hskFlipCard','[]')
+				// If first time / no localstorage found
+				if (localStorage.getItem('chineseWorkshopFlipCard') == null) {
+					localStorage.setItem('chineseWorkshopFlipCard','[]')
 				}
-				const data = JSON.parse(localStorage.getItem("hskFlipCard"));
+				// else load learned words
+				const data = JSON.parse(localStorage.getItem("chineseWorkshopFlipCard"));
 				for (const card of data) {
 					learnedWords.push(card);
 				}
 			}
+			// TTS
 			function setTTS(word) {
 				const a = `https://texttospeech.responsivevoice.org/v1/text:synthesize?text=${encodeURIComponent(word)}&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female`;
 				if (tts.src != a) tts.src = a;
@@ -307,8 +304,9 @@
 				setTTS(word);
 				tts.play();
 			}
+			// Settings
 			function resetProgress() {
-				localStorage.removeItem("hskFlipCard");
+				localStorage.removeItem("chineseWorkshopFlipCard");
 				location.reload();
 			}
 			function loadProgress() {
@@ -327,7 +325,7 @@
 				}
 			}
 			function checkValidProgress(progress) {
-				const keys = ["date", "daysBetweenReview", "difficulty", "eng", "hsk", "pinyin", "simplified", "traditional"];
+				const keys = ["date", "daysBetweenReview", "difficulty", "eng", "lesson", "pinyin", "simplified", "traditional"];
 				for (let i=0; i<progress.length; i++) {
 					const word = progress[i];
 					const key = Object.keys(word).sort();
@@ -347,12 +345,14 @@
 				}
 				return true;
 			}
+			// SRS
 			function runSRS() {
 				if (weightedCardSet.length > 0) {
 					srsIndex = 0;
 					srsProgress.value = 0;
 					srsProgress.max = weightedCardSet.length;
 					getSRSCard(weightedCardSet,srsFrontCard,srsBackCard);
+					//console.log(weightedCardSet);
 					openClose(true,srsPopup);
 				} else {
 					showInfoPopup("No words to study for today!");
@@ -382,6 +382,7 @@
 				const cards = [];
 				const timeNow = new Date().getTime();
 				for (let i=0; i<set.length; i++) {
+					// check date not today first
 					if (timeNow-new Date(set[i].date).getTime() >= set[i].daysBetweenReview*86399462) {
 						cards.push(i);
 					}
@@ -398,6 +399,7 @@
 					return;
 				}
 				const timeNow = new Date().getTime();
+				// get card, display card
 				const cardNum = set[srsIndex];
 				const card = learnedWords[cardNum];
 				front.innerHTML = `
@@ -458,6 +460,7 @@
 					chooseBtnWrapper.appendChild(choiceBtn);
 				}
 			}
+			// Study
 			function study() {
 				openClose(true,studyPopup);
 				studyIndex = 0;
@@ -497,51 +500,53 @@
 					}
 				}
 			}
-			function getCard(set, front, back) {
+			function getCard(set,front,back) {
 				if (studyIndex == set.length) {
 					showInfoPopup("Finished studying! New words added!");
 					setTimeout(() => {
-						showResult(set, correct);
-					}, 500);
+						showResult(set,correct);
+					},500);
 					return;
 				}
+				//console.log(set);
+				// get card, display card
 				const cardNum = set[studyIndex];
 				const card = dictCards[cardNum];
 				front.innerHTML = `
 					<p>${card.pinyin}</p>
-					<p>${chineseAlpha.value == 'simplified' ? card.simplified : card.traditional}</p>
+					<p>${chineseAlpha.value=='simplified'?card.simplified:card.traditional}</p>
 				`;
 				back.innerHTML = `
 					<p>${card.pinyin}</p>
 					<p>${card.eng}</p>
 				`;
 				checkPinyin();
-				let options = shuffle([...set]); // 创建副本并打乱
-				options.length = 3; // 限制为 3 个选项
+				// get 3 answer options
+				let options = shuffle(set);
+				options.length = 3;
 				if (!options.includes(cardNum)) {
-					options.pop(); // 移除最后一个，确保正确答案有位置
-					options.push(cardNum); // 添加正确答案
+					options.pop();
+					options.push(cardNum);
 				}
-				options = shuffle(options); // 再次打乱
-				console.log("Options:", options.map(n => dictCards[n].eng)); // 调试日志
 				playTTS(card.simplified);
+				options = shuffle(options);
 				const optionBtnWrapper = document.getElementById("divAnswers");
 				canFlip = false;
-				toggleAnimate(bigCard, 'animate-2');
-				toggleAnimate(optionBtnWrapper, 'animate-3');
+				toggleAnimate(bigCard,'animate-2');
+				toggleAnimate(optionBtnWrapper,'animate-3');
 				setTimeout(() => canFlip = true, 700);
 				optionBtnWrapper.innerHTML = '';
-				for (let n of options) {
+				for (n of options) {
 					const answerBtn = document.createElement('button');
-					answerBtn.innerHTML = dictCards[n].eng; // 使用正确的英文解释
-					setTimeout(() => answerBtn.value = 'canClick', 900);
+					answerBtn.innerHTML = dictCards[n].eng;
+					setTimeout(() => answerBtn.value = 'canClick',900);
 					answerBtn.onclick = function() {
 						if (this.value == "canClick") {
 							let count = 0;
 							this.classList.toggle('active');
 							this.disabled = true;
 							if (this.innerHTML == backCard.children[1].innerHTML) {
-								for (let dom of optionBtnWrapper.children) {
+								for (dom of optionBtnWrapper.children) {
 									if (dom.disabled == true) count++;
 									dom.disabled = true;
 								}
@@ -553,8 +558,8 @@
 									if (bigCard.classList.contains('flipped')) bigCard.classList.remove('flipped');
 									progress.value++;
 									studyIndex++;
-									getCard(set, front, back);
-								}, 700);
+									getCard(set,front,back);
+								},700);
 							} else {
 								this.style.backgroundColor = 'rgba(0,0,0,0.5)';
 							}
@@ -563,6 +568,7 @@
 					optionBtnWrapper.appendChild(answerBtn);
 				}
 			}
+			// Main menu function to give onclick event. CSS animation to flip card.
 			function getMainCardData() {
 				const allCards = document.getElementsByClassName('cards');
 				for (let i = 0; i < allCards.length; i++) {
@@ -590,6 +596,7 @@
 				}
 				getMainCardData();
 			}
+			// Custom logic functions for returning certain logical things.
 			function randint(min, max) {
 				return Math.floor(Math.random() * (max - min + 1) ) + min;
 			}
@@ -599,9 +606,11 @@
 			function clampNumber(num, a, b) {
 				return Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b));
 			}
+			// Encode base64
 			function utoa(str) {
 				return window.btoa(unescape(encodeURIComponent(str)));
 			}
+			// Decode base64
 			function atou(str) {
 				return decodeURIComponent(escape(window.atob(str)));
 			}
@@ -618,8 +627,7 @@
 					if (!force) window.history.replaceState({page:'home'},'home');
 					document.getElementById(`page${meny.name}`).style.display = 'flex';
 					document.getElementById("bodyWrapper").children[0].style.display = 'block';
-					openClose(false,hskPopup);
-					openClose(false,workshopPopup);
+					openClose(false,lessonPopup);
 					openClose(false,studyPopup);
 				} else if (meny.name == 2) {
 					if (!force) window.history.replaceState({page:'test'},'test');
@@ -633,60 +641,41 @@
 				}
 				document.getElementById(`page${meny.name}`).style.display = 'block';
 			}
+			// Custom function for toggling CSS animations after a given time.
 			function toggleAnimate(dom,animateName,time=1400) {
 				dom.classList.toggle(animateName);
-				setTimeout(() => {
+				setTimeout(() =>{
 					dom.classList.toggle(animateName);
 				},time);
 			}
-			function getCategory(arrDom, output, type) {
+			// Function to choose which Lesson, display as text too.
+			function getCategory(arrDom,output) {
+				elvl.innerHTML = 'Chinese Workshop';
 				dictCards = [];
-				output.innerHTML = type === 'hsk' ? 'HSK' : 'Chinese Workshop';
 				for (let i = 0; i < arrDom.length; i++) {
 					if (arrDom[i].checked) {
 						let value = arrDom[i].value;
-						output.innerHTML += `-${value}`;
-						let dict;
-						if (type === 'hsk') {
-							dict = eval(`hsk${value}`);
-						} else {
-							dict = eval(`lesson${value}`);
-						}
-						for (let j = 0; j < dict.length; j++) {
-							let entry = dict[j].split("\t");
-							let eng = entry.splice(4, entry.length).join(' ');
-							dictCards.push({
-								simplified: entry[0],
-								traditional: entry[1],
-								pinyin: entry[3],
-								eng: eng,
-								[type === 'hsk' ? 'hsk' : 'level']: value
-							});
+						elvl.innerHTML += `-${value}`;
+						// Push all lesson to dict.
+						let dict = eval(`lesson${value}`);
+						for (let i = 0; i < dict.length; i++) {
+							let entry = dict[i].split("\t");
+							let eng = entry.splice(4,entry.length).join(' ')
+							dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, lesson: value});
 						}
 					}
 				}
 				if (dictCards.length == 0) {
 					arrDom[0].checked = true;
-					output.innerHTML += `-${arrDom[0].value}`;
-					let dict;
-					if (type === 'hsk') {
-						dict = hsk1;
-					} else {
-						dict = lesson1;
-					}
-					for (let i = 0; i < dict.length; i++) {
-						let entry = dict[i].split("\t");
-						let eng = entry.splice(4, entry.length).join(' ');
-						dictCards.push({
-							simplified: entry[0],
-							traditional: entry[1],
-							pinyin: entry[3],
-							eng: eng,
-							[type === 'hsk' ? 'hsk' : 'level']: arrDom[0].value
-						});
+					elvl.innerHTML += `-${arrDom[0].value}`;
+					for (let i = 0; i < lesson1.length; i++) {
+						let entry = lesson1[i].split(' ');
+						let eng = entry.splice(4,entry.length).join(' ')
+						dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, lesson: arrDom[0].value});
 					}
 				}
 			}
+			// Get unique cards from dictCards
 			function getCards(list,n,index=true) {
 				let set = new Set();
 				while (set.size < n) {
@@ -697,12 +686,15 @@
 					}
 				}
 				set = Array.from(set);
+				console.log(set);
 				return set;
 			}
+			// Custom function to open/close popups.
 			function openClose(bool,dom,animateType=1) {
 				if (bool) {
 					dom.style.visibility = 'visible';
 					dom.style.opacity = '1';
+
 					if (animateType !== 0) {
 						for (let i = 0; i < dom.childElementCount; i++) {
 							toggleAnimate(dom.children[i],`animate-${animateType}`);
@@ -718,15 +710,17 @@
 	<body>
 		<div id="loader">
 			<div id="audio"></div>
+			<!-- <div id="preloader" preload></div> -->
 			<div class="spinner" preload></div>
 		</div>
 		<div id="bodyWrapper">
+			<!-- Header -->
 			<header>
-				<button id="elvl">HSK</button>
-				<button id="workshopSelect">Chinese Workshop</button>
-				<span id="courseLevel" style="margin-left: 10px;"></span>
+				<button id="elvl">Chinese Workshop</button>
 			</header>
+			<!-- Main -->
 			<main>
+				<!-- PAGE 1 -->
 				<div id="page1">
 					<div class="cardsMain">
 						<div id="cardDiv">
@@ -737,6 +731,7 @@
 						</div>
 					</div>
 				</div>
+				<!-- PAGE 2 -->
 				<div id="page2">
 					<div class="review">
 						<div class="roundCircle" id="SRS">
@@ -752,50 +747,60 @@
 						</div>
 					</div>
 				</div>
+				<!-- PAGE 3 -->
 				<div id="page3">
 					<h3 id="wordsLearned">Words Learned:</h3>
 					<div id="listWords">
-						<div><p class="lwp">HSK1</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">HSK2</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">HSK3</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">HSK4</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">HSK5</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">HSK6</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson1</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson2</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson3</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson4</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson5</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson6</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson7</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson8</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson9</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson10</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson11</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">Lesson12</p><div class="lwhsk"></div></div>
 					</div>
 				</div>
 			</main>
+			<!-- Footer -->
 			<footer>
 				<button name="1" id='home' class='active'><i>🏠</i></button>
 				<button name="2" id='test'><i>📚</i></button>
 				<button name="3" id='list'><i>📜</i></button>
 			</footer>
-			<div class="popup" id='hskPopup'>
+
+			<!-- Lesson Popup -->
+			<div class="popup" id='lessonPopup'>
 				<div>
-					<h4>Choose Flipcards from categories</h4>
-					<p><input type="checkbox" name="hsk-1" id="hsk1" value="1" checked><label for="hsk1">HSK1</label></p>
-					<p><input type="checkbox" name="hsk-2" id="hsk2" value="2"><label for="hsk2">HSK2</label></p>
-					<p><input type="checkbox" name="hsk-3" id="hsk3" value="3"><label for="hsk3">HSK3</label></p>
-					<p><input type="checkbox" name="hsk-4" id="hsk4" value="4"><label for="hsk4">HSK4</label></p>
-					<p><input type="checkbox" name="hsk-5" id="hsk5" value="5"><label for="hsk5">HSK5</label></p>
-					<p><input type="checkbox" name="hsk-6" id="hsk6" value="6"><label for="hsk6">HSK6</label></p>
+					<h4>Choose Flipcards from lessons</h4>
+					<p><input type="checkbox" name="lesson-1" id="lesson1" value="1" checked><label for="lesson1">Lesson1</label></p>
+					<p><input type="checkbox" name="lesson-2" id="lesson2" value="2"><label for="lesson2">Lesson2</label></p>
+					<p><input type="checkbox" name="lesson-3" id="lesson3" value="3"><label for="lesson3">Lesson3</label></p>
+					<p><input type="checkbox" name="lesson-4" id="lesson4" value="4"><label for="lesson4">Lesson4</label></p>
+					<p><input type="checkbox" name="lesson-5" id="lesson5" value="5"><label for="lesson5">Lesson5</label></p>
+					<p><input type="checkbox" name="lesson-6" id="lesson6" value="6"><label for="lesson6">Lesson6</label></p>
+					<p><input type="checkbox" name="lesson-7" id="lesson7" value="7"><label for="lesson7">Lesson7</label></p>
+					<p><input type="checkbox" name="lesson-8" id="lesson8" value="8"><label for="lesson8">Lesson8</label></p>
+					<p><input type="checkbox" name="lesson-9" id="lesson9" value="9"><label for="lesson9">Lesson9</label></p>
+					<p><input type="checkbox" name="lesson-10" id="lesson10" value="10"><label for="lesson10">Lesson10</label></p>
+					<p><input type="checkbox" name="lesson-11" id="lesson11" value="11"><label for="lesson11">Lesson11</label></p>
+					<p><input type="checkbox" name="lesson-12" id="lesson12" value="12"><label for="lesson12">Lesson12</label></p>
 				</div>
 				<br>
-				<button id="hskButton" class='btn'>Confirm</button>
+				<button id="lessonButton" class='btn'>Confirm</button>
 			</div>
-			<div class="popup" id='workshopPopup' style="display: none;">
-				<div>
-					<h4>Choose Workshop Lessons</h4>
-					<p><input type="checkbox" name="workshop-1" id="workshop1" value="1" checked><label for="workshop1">Lesson 1</label></p>
-					<p><input type="checkbox" name="workshop-2" id="workshop2" value="2"><label for="workshop2">Lesson 2</label></p>
-				</div>
-				<br>
-				<button id="workshopButton" class='btn'>Confirm</button>
-			</div>
+
+			<!-- Study Flipcards -->
 			<div class="popup" id='studyResults'>
 				<div>
 				</div>
 				<button id="resultButton" class='btn'>Done</button>
 			</div>
+
 			<div class="popup" id='study'>
 				<header class="popupHeader">
 					<div>
@@ -832,6 +837,8 @@
 				</div>
 				<progress id='progress' value="0" max="9"></progress>
 			</div>
+
+			<!-- Spaced Repetitive Study flipcards -->
 			<div class="popup" id='srsPopup'>
 				<header class="popupHeader">
 					<div>
@@ -868,6 +875,8 @@
 				</div>
 				<progress id='srsProgress' value="0" max="9"></progress>
 			</div>
+
+			<!-- Settings -->
 			<div class="popup" id='settingsPopup'>
 				<div class="whitebox">
 					<h4>Chinese character writing:</h4>
@@ -882,10 +891,12 @@
 					<button id="settingsCloseBtn" class='btn'>close settings</button>
 				</div>
 			</div>
+
+			<!-- Credits -->
 			<div class="popup" id='creditPopup'>
 				<div class="whitebox">
 					<h4>Code and app design by me</h4>
-					<p>HSK Dictionary data provided by <a href="https://github.com/ReubenBond/HanBaoBao" target="_blank">ReubenBond's app HanBaoBao</a></p>
+					<p>Dictionary data provided by [Your Source]</p>
 					<p>Spaced Repetition Learning algorithm (SM2+) provided by <a href="http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2" target="_blank">BlueRaja</a></p>
 					<p>Text-to-speech provided by <a href="https://texttospeech.io/" target="_blank">https://texttospeech.io/</a></p>
 					<p>The project and the datas provided are presented without licences<br/>
@@ -893,6 +904,8 @@
 					<button id="creditCloseBtn" class='btn'>Close credits</button>
 				</div>
 			</div>
+
+			<!-- reset prompt popup -->
 			<div class="popup" id='resetPopup'>
 				<div class="whitebox">
 					<h4>Do you really want to reset your progress?</h4>
@@ -901,11 +914,12 @@
 				</div>
 			</div>
 			<audio id="tts" src="https://texttospeech.responsivevoice.org/v1/text:synthesize?text=%E7%8B%97&lang=zh-CN&engine=g1&name=&pitch=0.5&rate=0.5&volume=1&key=PL3QYYuV&gender=female"></audio>
+			<!-- info popup -->
 			<div class="popup" id='infoPopup'>
 				<div class="whitebox">
 					<h4>Successfully updated learned words!</h4>
 				</div>
 			</div>
 		</div>
-	</body>
+	<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9228a7853ed72583',t:'MTc0MjM0MjA1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
