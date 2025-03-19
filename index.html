@@ -129,9 +129,15 @@
 				eflip.onclick = () => { 
 					if (canFlip) {
 						bigCard.classList.toggle('flipped');
-						playTTS(bigCard.children[0].children[1].innerText);
+						// 翻转时不再播放发音，因为点击正面已经处理了发音
 					}
 				}
+				// 点击正面播放发音
+				frontCard.onclick = (event) => {
+					event.stopPropagation(); // 阻止事件冒泡到 eflip
+					const word = frontCard.children[1].innerText; // 获取正面中文内容
+					playTTS(word); // 播放发音
+				};
 				eback.onclick = () => {
 					openClose(false,studyPopup);
 					window.history.back();
@@ -916,5 +922,5 @@
 				</div>
 			</div>
 		</div>
-	</body>
+	<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'922b5f325c06b078',t:'MTc0MjM3MDU1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
