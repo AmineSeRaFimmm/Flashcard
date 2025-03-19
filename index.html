@@ -14,18 +14,12 @@
 	<meta name="theme-color" content="#ffffff">
 		<link href="css/index2.css" rel="stylesheet" type="text/css">
 		<link href="css/preloader.css" rel="stylesheet" type="text/css">
-		<script type="text/javascript" src='lessons/lesson1.js'></script>
-		<script type="text/javascript" src='lessons/lesson2.js'></script>
-		<script type="text/javascript" src='lessons/lesson3.js'></script>
-		<script type="text/javascript" src='lessons/lesson4.js'></script>
-		<script type="text/javascript" src='lessons/lesson5.js'></script>
-		<script type="text/javascript" src='lessons/lesson6.js'></script>
-		<script type="text/javascript" src='lessons/lesson7.js'></script>
-		<script type="text/javascript" src='lessons/lesson8.js'></script>
-		<script type="text/javascript" src='lessons/lesson9.js'></script>
-		<script type="text/javascript" src='lessons/lesson10.js'></script>
-		<script type="text/javascript" src='lessons/lesson11.js'></script>
-		<script type="text/javascript" src='lessons/lesson12.js'></script>
+		<script type="text/javascript" src='hsk/hsk1.js'></script>
+		<script type="text/javascript" src='hsk/hsk2.js'></script>
+		<script type="text/javascript" src='hsk/hsk3.js'></script>
+		<script type="text/javascript" src='hsk/hsk4.js'></script>
+		<script type="text/javascript" src='hsk/hsk5.js'></script>
+		<script type="text/javascript" src='hsk/hsk6.js'></script>
 		<link rel="manifest" href="manifest.json">
 		<script type="text/javascript">
 			if ('serviceWorker' in navigator) {
@@ -35,7 +29,7 @@
 		<script type="text/javascript">
 			//https://github.com/ReubenBond/HanBaoBao/blob/master/DictionaryDbBuilder/Hsk/HskHskCom/2.txt
 			//http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2
-			setTimeout(showPage, 14);
+			setTimeout(writePage, 14);
 			function showPage() {
 				document.getElementById("loader").style.visibility = "hidden";
 				document.getElementById("loader").style.opacity = 0;
@@ -51,7 +45,7 @@
 			let cardSets = new Set();
 			
 			let tts; // tts
-			let lessonPopup, checkBox, elvl, lessonButton; // page 1 header
+			let hskPopup, checkBox, elvl, hskButton; // page 1 header
 			let cardDiv, studyBtn, refreshCards, studyIndex = 0; // page 1 main
 			let studyPopup, eflip, eback, bigCard, frontCard, backCard, progress, studyResults, resultButton, pinyinToggle, canFlip = true; //study screen
 			let srsBtn, srsPopup, ebackSrs, srsFrontCard, srsBackCard, srsProgress, srsPinyinToggle, srsIndex = 0, weightedCardSet = []; // srs screen
@@ -91,15 +85,15 @@
 				for (let i = 0; i < checkBox.length; i++) {
 					checkBox[i].onchange = () => getCategory(checkBox,elvl);
 				}
-				lessonPopup = document.getElementById("lessonPopup");
+				hskPopup = document.getElementById("hskPopup");
 				elvl = document.getElementById('elvl');
 				elvl.onclick = () => {
-					openClose(true,lessonPopup);
+					openClose(true,hskPopup);
 					window.history.pushState({page:'home',popup:1}, 'home');
 				}
-				lessonButton = document.getElementById('lessonButton');
-				lessonButton.onclick = () => {
-					openClose(false,lessonPopup);
+				hskButton = document.getElementById('hskButton');
+				hskButton.onclick = () => {
+					openClose(false,hskPopup);
 					init();
 					window.history.back();
 				};
@@ -173,7 +167,7 @@
 				creditCloseBtn = document.getElementById("creditCloseBtn");
 				settingsBtn.onclick = () => {
 					openClose(true, settingsPopup);
-					textarea.value = utoa(localStorage.chineseWorkshopFlipCard);
+					textarea.value = utoa(localStorage.hskFlipCard);
 					window.history.pushState({page:'test',popup:2}, 'test');
 				}
 				settingsLoadBtn.onclick = () => loadProgress();
@@ -239,7 +233,7 @@
 				lwp = document.getElementsByClassName('lwp');
 				for (p of lwp) {
 					p.onclick = function() {
-						lwhsk[+this.innerText.substring(6)-1].classList.toggle("lwshow");
+						lwhsk[+this.innerText.substring(3)-1].classList.toggle("lwshow");
 						this.classList.toggle("lwshow");
 					}
 				}
@@ -262,7 +256,7 @@
 				for (const word of wordList) {
 					const card = document.createElement('div');
 					card.innerHTML = `<span>${chineseAlpha.value=='simplified'?word.simplified:word.traditional}</span> <span>${word.pinyin}</span> <span>${word.eng}</span>`;
-					lwhsk[+word.lesson-1].appendChild(card);
+					lwhsk[+word.hsk-1].appendChild(card);
 				}
 			}
 			function addToLearnedWords(set, correct) {
@@ -270,7 +264,7 @@
 					const cardNum = set[i];
 					const card = dictCards[cardNum];
 					if (!learnedWords.includes(card)) {
-						card.difficulty = card.lesson*0.1 + 0.3;
+						card.difficulty = card.hsk*0.1 + 0.3;
 						card.difficulty += correct[i] == 1 ? -0.1 : 0.1; // difficulty increase if not correct on study
 						// set time to yesterday so srs can run
 						// 1 day = 86399462
@@ -282,15 +276,15 @@
 				setLocalStorage(JSON.stringify(learnedWords));
 			}
 			function setLocalStorage(str) {
-				localStorage.setItem('chineseWorkshopFlipCard',str)
+				localStorage.setItem('hskFlipCard',str)
 			}
 			function checkLocalStorage() {
 				// If first time / no localstorage found
-				if (localStorage.getItem('chineseWorkshopFlipCard') == null) {
-					localStorage.setItem('chineseWorkshopFlipCard','[]')
+				if (localStorage.getItem('hskFlipCard') == null) {
+					localStorage.setItem('hskFlipCard','[]')
 				}
 				// else load learned words
-				const data = JSON.parse(localStorage.getItem("chineseWorkshopFlipCard"));
+				const data = JSON.parse(localStorage.getItem("hskFlipCard"));
 				for (const card of data) {
 					learnedWords.push(card);
 				}
@@ -306,7 +300,7 @@
 			}
 			// Settings
 			function resetProgress() {
-				localStorage.removeItem("chineseWorkshopFlipCard");
+				localStorage.removeItem("hskFlipCard");
 				location.reload();
 			}
 			function loadProgress() {
@@ -325,7 +319,7 @@
 				}
 			}
 			function checkValidProgress(progress) {
-				const keys = ["date", "daysBetweenReview", "difficulty", "eng", "lesson", "pinyin", "simplified", "traditional"];
+				const keys = ["date", "daysBetweenReview", "difficulty", "eng", "hsk", "pinyin", "simplified", "traditional"];
 				for (let i=0; i<progress.length; i++) {
 					const word = progress[i];
 					const key = Object.keys(word).sort();
@@ -627,7 +621,7 @@
 					if (!force) window.history.replaceState({page:'home'},'home');
 					document.getElementById(`page${meny.name}`).style.display = 'flex';
 					document.getElementById("bodyWrapper").children[0].style.display = 'block';
-					openClose(false,lessonPopup);
+					openClose(false,hskPopup);
 					openClose(false,studyPopup);
 				} else if (meny.name == 2) {
 					if (!force) window.history.replaceState({page:'test'},'test');
@@ -656,22 +650,25 @@
 					if (arrDom[i].checked) {
 						let value = arrDom[i].value;
 						elvl.innerHTML += `-${value}`;
-						// Push all lesson to dict.
-						let dict = eval(`lesson${value}`);
-						for (let i = 0; i < dict.length; i++) {
-							let entry = dict[i].split("\t");
-							let eng = entry.splice(4,entry.length).join(' ')
-							dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, lesson: value});
+						// Map Lesson1-12 to hsk1-6
+						let hskValue = Math.min(i + 1, 6); // Limit to 6 HSK levels
+						let dict = eval(`hsk${hskValue}`);
+						for (let j = 0; j < dict.length; j++) {
+							let entry = dict[j].split("\t");
+							let eng = entry.splice(4,entry.length).join(' ');
+							dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, hsk: hskValue.toString()});
 						}
 					}
 				}
 				if (dictCards.length == 0) {
 					arrDom[0].checked = true;
 					elvl.innerHTML += `-${arrDom[0].value}`;
-					for (let i = 0; i < lesson1.length; i++) {
-						let entry = lesson1[i].split(' ');
-						let eng = entry.splice(4,entry.length).join(' ')
-						dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, lesson: arrDom[0].value});
+					let hskValue = 1; // Default to hsk1
+					let dict = hsk1;
+					for (let j = 0; j < dict.length; j++) {
+						let entry = dict[j].split(' ');
+						let eng = entry.splice(4,entry.length).join(' ');
+						dictCards.push({simplified: entry[0], traditional: entry[1], pinyin: entry[3], eng: eng, hsk: hskValue.toString()});
 					}
 				}
 			}
@@ -751,18 +748,12 @@
 				<div id="page3">
 					<h3 id="wordsLearned">Words Learned:</h3>
 					<div id="listWords">
-						<div><p class="lwp">Lesson1</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson2</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson3</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson4</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson5</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson6</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson7</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson8</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson9</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson10</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson11</p><div class="lwhsk"></div></div>
-						<div><p class="lwp">Lesson12</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">HSK1</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">HSK2</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">HSK3</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">HSK4</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">HSK5</p><div class="lwhsk"></div></div>
+						<div><p class="lwp">HSK6</p><div class="lwhsk"></div></div>
 					</div>
 				</div>
 			</main>
@@ -774,7 +765,7 @@
 			</footer>
 
 			<!-- Lesson Popup -->
-			<div class="popup" id='lessonPopup'>
+			<div class="popup" id='hskPopup'>
 				<div>
 					<h4>Choose Flipcards from lessons</h4>
 					<p><input type="checkbox" name="lesson-1" id="lesson1" value="1" checked><label for="lesson1">Lesson1</label></p>
@@ -791,7 +782,7 @@
 					<p><input type="checkbox" name="lesson-12" id="lesson12" value="12"><label for="lesson12">Lesson12</label></p>
 				</div>
 				<br>
-				<button id="lessonButton" class='btn'>Confirm</button>
+				<button id="hskButton" class='btn'>Confirm</button>
 			</div>
 
 			<!-- Study Flipcards -->
@@ -896,7 +887,7 @@
 			<div class="popup" id='creditPopup'>
 				<div class="whitebox">
 					<h4>Code and app design by me</h4>
-					<p>Dictionary data provided by [Your Source]</p>
+					<p>HSK Dictionary data provided by <a href="https://github.com/ReubenBond/HanBaoBao" target="_blank">ReubenBond's app HanBaoBao</a></p>
 					<p>Spaced Repetition Learning algorithm (SM2+) provided by <a href="http://www.blueraja.com/blog/477/a-better-spaced-repetition-learning-algorithm-sm2" target="_blank">BlueRaja</a></p>
 					<p>Text-to-speech provided by <a href="https://texttospeech.io/" target="_blank">https://texttospeech.io/</a></p>
 					<p>The project and the datas provided are presented without licences<br/>
@@ -921,5 +912,5 @@
 				</div>
 			</div>
 		</div>
-	<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9228a7853ed72583',t:'MTc0MjM0MjA1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+	<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9228d1dc68007451',t:'MTc0MjM0Mzc5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
