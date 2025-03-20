@@ -1,6 +1,6 @@
 {
-    "name": "hsk-flip-card",
-    "short_name" : "hfc",
+    "name": "chinese_workshop_flashcard",
+    "short_name" : "cwf",
     "start_url": "index.html?utm_source=homescreen",
     "scope" : "./",
     "icons": [
